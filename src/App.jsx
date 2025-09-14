@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from './supabaseClient';
 import Sidebar from './components/Sidebar';
-import TodoList from './components/TodoList';
+import TodoList from './components/TodoList'   // TodoList 컴포넌트 임포트
 import './App.css';
 
 function App() {
@@ -31,7 +31,7 @@ function App() {
 		return (
 			<div className="login-page">
 				<h1>HoToDo</h1>
-				<p>당신의 게임 라이프를 관리하세요.</p>
+				<p>호빵맨 할일관리사이트</p>
 				<button onClick={signInWithDiscord}>Discord로 로그인</button>
 			</div>
 		);
