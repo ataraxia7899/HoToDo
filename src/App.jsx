@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { supabase } from './supabaseClient';
-import TodoList from './components/TodoList'; // TodoList 컴포넌트를 임포트합니다.
+import Sidebar from './components/Sidebar';
+import TodoList from './components/TodoList';
 import './App.css';
 
 function App() {
 	const [session, setSession] = useState(null);
 
 	useEffect(() => {
+		// 세션 정보 가져오기 및 인증 상태 변경 감지
 		supabase.auth.getSession().then(({ data: { session } }) => {
 			setSession(session);
 		});
@@ -24,26 +26,25 @@ function App() {
 		await supabase.auth.signInWithOAuth({ provider: 'discord' });
 	}
 
-	async function signOut() {
-		await supabase.auth.signOut();
+	// 로그인하지 않았을 때 보여줄 화면
+	if (!session) {
+		return (
+			<div className="login-page">
+				<h1>HoToDo</h1>
+				<p>당신의 게임 라이프를 관리하세요.</p>
+				<button onClick={signInWithDiscord}>Discord로 로그인</button>
+			</div>
+		);
 	}
 
+	// 로그인했을 때 보여줄 화면
 	return (
-		<div className="App">
-			<header className="App-header">
-				<h1>HoToDo</h1>
-				{!session ? (
-					<button onClick={signInWithDiscord}>Discord로 로그인</button>
-				) : (
-					<div>
-						<p>{session.user.email}님, 환영합니다!</p>
-						<button onClick={signOut}>로그아웃</button>
-						{/* 로그인된 경우 TodoList 컴포넌트를 렌더링합니다. */}
-						{/* session 객체를 props로 넘겨줍니다. */}
-						<TodoList key={session.user.id} session={session} />
-					</div>
-				)}
-			</header>
+		<div className="app-layout">
+			<Sidebar session={session} />
+			<main className="main-content">
+				<h1>My Tasks</h1>
+				<TodoList key={session.user.id} session={session} />
+			</main>
 		</div>
 	);
 }
