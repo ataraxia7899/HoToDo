@@ -7,12 +7,12 @@ export default function Log() {
 
 	useEffect(() => {
 		async function fetchLogs() {
-			// This requires you to have enabled auditing on your tables in Supabase.
-			// e.g., ALTER TABLE todos ENABLE ROW LEVEL SECURITY; CREATE POLICY "Public access" ON todos FOR SELECT USING (true);
-			// and then enable auditing on the table in the Supabase UI.
 			try {
 				setLoading(true);
-				const { data, error } = await supabase.rpc('get_audit_logs');
+				const { data, error } = await supabase
+					.from('detailed_audit_log')
+					.select('*')
+					.order('action_timestamp', { ascending: false });
 
 				if (error) {
 					throw error;
@@ -40,19 +40,30 @@ export default function Log() {
 				{logs.map((log) => (
 					<div key={log.id} className="log-entry">
 						<p>
-							<strong>Action:</strong> {log.payload.action}
+							<strong>User:</strong> {log.user_email || 'Unknown'}
 						</p>
 						<p>
-							<strong>Table:</strong> {log.payload.table}
+							<strong>Action:</strong> {log.action}
 						</p>
 						<p>
-							<strong>Record ID:</strong> {log.payload.record_id}
+							<strong>Table:</strong> {log.table_name}
 						</p>
 						<p>
 							<strong>Timestamp:</strong>{' '}
-							{new Date(log.created_at).toLocaleString()}
+							{new Date(log.action_timestamp).toLocaleString()}
 						</p>
-						<pre>{JSON.stringify(log.payload, null, 2)}</pre>
+						{log.new_record_data && (
+							<div>
+								<strong>New Data:</strong>{' '}
+								<pre>{JSON.stringify(log.new_record_data, null, 2)}</pre>
+							</div>
+						)}
+						{log.old_record_data && (
+							<div>
+								<strong>Old Data:</strong>{' '}
+								<pre>{JSON.stringify(log.old_record_data, null, 2)}</pre>
+							</div>
+						)}
 					</div>
 				))}
 			</div>
