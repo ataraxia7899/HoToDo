@@ -1,8 +1,8 @@
 import React from 'react';
 import { supabase } from '../supabaseClient';
 
-// session 정보를 props로 받습니다.
-export default function Sidebar({ session }) {
+// session, activeView, setActiveView 정보를 props로 받습니다.
+export default function Sidebar({ session, activeView, setActiveView }) {
 	async function signOut() {
 		await supabase.auth.signOut();
 	}
@@ -13,10 +13,18 @@ export default function Sidebar({ session }) {
 				<h1 className="sidebar-logo">HoToDo</h1>
 			</div>
 			<ul className="sidebar-menu">
-				{/* 'active' 클래스로 현재 활성화된 메뉴를 표시합니다. */}
-				<li className="menu-item active">Tasks</li>
-				<li className="menu-item">Dashboard</li>
-				<li className="menu-item">Settings</li>
+				<li
+					className={`menu-item ${activeView === 'Tasks' ? 'active' : ''}`}
+					onClick={() => setActiveView('Tasks')}
+				>
+					Tasks
+				</li>
+				<li
+					className={`menu-item ${activeView === 'Log' ? 'active' : ''}`}
+					onClick={() => setActiveView('Log')}
+				>
+					Log
+				</li>
 			</ul>
 			<div className="sidebar-footer">
 				<div className="user-profile">
