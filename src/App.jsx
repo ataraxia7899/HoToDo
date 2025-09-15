@@ -2,33 +2,42 @@ import { useState, useEffect } from 'react';
 import { supabase } from './supabaseClient';
 import Sidebar from './components/Sidebar';
 import TodoList from './components/TodoList';
-import Log from './components/Log'; // Import Log component
+import Log from './components/Log';
 import './App.css';
 
 function App() {
 	const [session, setSession] = useState(null);
-	const [activeView, setActiveView] = useState('Tasks'); // State for active view
+	const [loading, setLoading] = useState(true); // 로딩 상태 추가
+	const [activeView, setActiveView] = useState('Tasks');
 
 	useEffect(() => {
-		// 세션 정보 가져오기 및 인증 상태 변경 감지
+		setLoading(true);
 		supabase.auth.getSession().then(({ data: { session } }) => {
 			setSession(session);
+			setLoading(false); // 세션 가져온 후 로딩 false로 설정
 		});
 
 		const {
 			data: { subscription },
 		} = supabase.auth.onAuthStateChange((_event, session) => {
 			setSession(session);
+			setLoading(false); // 여기서도 로딩 상태 처리
 		});
 
-		return () => subscription.unsubscribe();
+		return () => {
+			subscription.unsubscribe();
+		};
 	}, []);
 
 	async function signInWithDiscord() {
 		await supabase.auth.signInWithOAuth({ provider: 'discord' });
 	}
 
-	// 로그인하지 않았을 때 보여줄 화면
+	// 세션 확인 중 로딩 표시기 표시
+	if (loading) {
+		return <div>Loading...</div>;
+	}
+
 	if (!session) {
 		return (
 			<div className="login-page">
@@ -39,10 +48,13 @@ function App() {
 		);
 	}
 
-	// 로그인했을 때 보여줄 화면
 	return (
 		<div className="app-layout">
-			<Sidebar session={session} activeView={activeView} setActiveView={setActiveView} />
+			<Sidebar
+				session={session}
+				activeView={activeView}
+				setActiveView={setActiveView}
+			/>
 			<main className="main-content">
 				{activeView === 'Tasks' ? (
 					<>
